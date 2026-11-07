@@ -1,0 +1,78 @@
+{
+  "checked_date": "2026-10-15",
+  "note": "file_sha identifies file content, not repository commit. Read-only source review; projects not executed.",
+  "core_sources": [
+    {
+      "key": "deep_ItzCrazyKns/Vane",
+      "url": "https://github.com/ItzCrazyKns/Vane/blob/master/src/lib/agents/search/researcher/index.ts",
+      "file_sha": "0a25d91df8715daeccd86d658813ab2b5335757b",
+      "found": true
+    },
+    {
+      "key": "deep_miurla/morphic",
+      "url": "https://github.com/miurla/morphic/blob/main/lib/tools/search.ts",
+      "file_sha": "c2370fd2d3fbc6f4040a60332a4ccb51de915a04",
+      "found": true
+    },
+    {
+      "key": "deep_spring-ai-alibaba/deepresearch",
+      "url": "https://github.com/spring-ai-alibaba/deepresearch/blob/main/src/main/java/com/alibaba/cloud/ai/example/deepresearch/config/DeepResearchConfiguration.java",
+      "file_sha": "3c7afc4e0c8b8d85a27cde1234b4b03cd635d145",
+      "found": true
+    },
+    {
+      "key": "deep_dgtlmoon/changedetection.io",
+      "url": "https://github.com/dgtlmoon/changedetection.io/blob/master/changedetectionio/processors/text_json_diff/processor.py",
+      "file_sha": "61c6db799d9d7ffe4f798c97be535e9a0aa1015a",
+      "found": true
+    },
+    {
+      "key": "source_dzhng/deep-research/src/deep-research.ts",
+      "url": "https://github.com/dzhng/deep-research/blob/main/src/deep-research.ts",
+      "file_sha": "7d074a1cc496f79267f7afe62af2fc2217be8fbd",
+      "found": true
+    },
+    {
+      "key": "source_langchain-ai/open_deep_research/src/open_deep_research/deep_researcher.py",
+      "url": "https://github.com/langchain-ai/open_deep_research/blob/main/src/open_deep_research/deep_researcher.py",
+      "file_sha": "279dbffd9e49e07962fb4e1cfeff79e45adc43e9",
+      "found": true
+    },
+    {
+      "key": "source_assafelovic/gpt-researcher/gpt_researcher/skills/researcher.py",
+      "url": "https://github.com/assafelovic/gpt-researcher/blob/main/gpt_researcher/skills/researcher.py",
+      "file_sha": "59e688e764be1feef316301321baba0301a64f00",
+      "found": true
+    },
+    {
+      "key": "more_bytedance/deer-flow/backend/packages/harness/deerflow/agents/lead_agent/agent.py",
+      "url": "https://github.com/bytedance/deer-flow/blob/main/backend/packages/harness/deerflow/agents/lead_agent/agent.py",
+      "file_sha": "65bdda1486d75d23b213c36c2c6359029b40b8b2",
+      "found": true
+    },
+    {
+      "key": "more_sansan0/TrendRadar/trendradar/report/generator.py",
+      "url": "https://github.com/sansan0/TrendRadar/blob/master/trendradar/report/generator.py",
+      "file_sha": "721915ac48e29acd2882f5ccd69698396bab0be4",
+      "found": true
+    },
+    {
+      "key": "more_LearningCircuit/local-deep-research/src/local_deep_research/search_system.py",
+      "url": "https://github.com/LearningCircuit/local-deep-research/blob/main/src/local_deep_research/search_system.py",
+      "file_sha": "a2a79ec9e906ab3aee05f6cfa68ebfeabd1b7885",
+      "found": true
+    }
+  ],
+  "queries": [
+    "deep research agent",
+    "searxng AI search",
+    "agentic search engine",
+    "Perplexica",
+    "local-deep-research",
+    "spring ai alibaba deepresearch",
+    "news monitoring rss",
+    "event tracking llm",
+    "changedetection.io",
+    "searxng search extract"
+  ]
+}

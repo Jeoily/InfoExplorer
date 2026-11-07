@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>InfoExplorer · 信息探索</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/">◎ <span>InfoExplorer</span></a><span class="tag">本地研究工作台</span></header>
+  <main>
+    <section class="intro"><div class="eyebrow">RESEARCH WORKSPACE</div><h1>从一个问题，找到依据。</h1><p>探索公开资料，保留证据，回看每一次研究。</p></section>
+    <section class="composer panel" aria-labelledby="new-title">
+      <form id="create-form">
+        <label id="new-title" for="question">开始一项研究</label>
+        <textarea id="question" name="question" maxlength="4000" rows="2" required placeholder="输入主题关键词，例如 artificial intelligence" aria-describedby="scope"></textarea>
+        <label for="search-language">检索语言</label><select id="search-language"><option value="zh">中文 Wikipedia</option><option value="en">英文 Wikipedia</option></select>
+        <div class="compose-footer"><p id="scope">当前检索范围为 Wikipedia；启用模型时会生成报告。请只输入公开主题，不要填写私人资料。</p><button id="create" class="primary" type="submit">开始研究 <span aria-hidden="true">↗</span></button></div>
+      </form>
+    </section>
+    <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+    <div class="workspace">
+      <section class="panel task-panel" aria-labelledby="tasks-title">
+        <div class="section-head"><h2 id="tasks-title">研究记录</h2><button id="refresh" class="text-button" type="button">刷新</button></div>
+        <label class="filter" for="status">状态<select id="status"><option value="">全部任务</option value="PENDING">等待处理</option><option value="RUNNING">正在研究</option><option value="SUCCEEDED">已完成</option><option value="FAILED">未完成</option></select></label>
+        <p id="list-status" class="muted" role="status"></p><div id="tasks" class="tasks"></div>
+        <nav class="pagination" aria-label="任务分页"><button id="prev" type="button">上一页</button><span id="page">第 1 页</span><button id="next" type="button">下一页</button></nav>
+      </section>
+      <section class="panel detail-panel" aria-labelledby="detail-title">
+        <div id="empty-detail" class="empty"><div class="empty-icon" aria-hidden="true">◎</div><h2 id="detail-title">在这里展开你的研究</h2><p>创建任务，或从左侧选择一条记录。<br>报告、来源与执行过程会保存在一起。</p></div>
+        <article id="detail" hidden>
+          <div class="section-head"><span id="task-status" class="badge"></span><span id="task-time" class="muted"></span></div>
+          <h2 id="task-title" class="task-title"></h2><p id="task-id" class="muted identifier"></p>
+          <p id="progress" class="callout" role="status"></p>
+          <button id="retry" class="primary" type="button" hidden>重试这次失败</button>
+          <section id="report-section" hidden><div class="section-head"><h3>研究报告</h3><span id="generation" class="muted"></span></div><p class="muted">引用编号通过格式校验，不等于结论已经过事实核验。</p><div id="answer" class="answer"></div><h3>公开证据</h3><div id="evidence"></div></section>
+          <section class="history"><h3>执行历史</h3><p id="history-status" class="muted"></p><ol id="runs"></ol></section>
+        </article>
+      </section>
+    </div>
+    <footer>InfoExplorer · 公开资料研究原型 <span>获取时间不是资料发布时间</span></footer>
+  </main>
+  <dialog id="retry-dialog" aria-labelledby="retry-title"><h2 id="retry-title">重新执行这项研究？</h2><p>会重新检索资料；如果服务已启用模型，可能再次消耗额度。原失败记录将保留。</p><p>每个任务最多执行 5 次。重复点击不会重复排队。</p><div class="dialog-actions"><button id="cancel-retry" type="button">暂不重试</button><button id="confirm-retry" class="primary" type="button">确认重试</button></div></dialog>
+</body>
+</html>

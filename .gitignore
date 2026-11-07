@@ -1,0 +1,37 @@
+# Local dependencies, generated output and editor state
+**/.venv/
+**/.web-deps/
+**/__pycache__/
+*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/target/
+**/node_modules/
+**/dist/
+**/playwright-report/
+**/test-results/
+**/.idea/
+*.iml
+*.log
+
+# Credentials and local runtime data: review independently before any upload.
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.sqlite
+*.sqlite3
+*.db
+/data/
+**/data/
+/logs/
+/backups/
+/.cache/
+/backend/java-api/.mvn/maven.config
+
+# Historical local directory snapshot (may contain machine-specific paths).
+/json文件/

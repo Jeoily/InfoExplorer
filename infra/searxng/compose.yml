@@ -1,0 +1,25 @@
+name: infoexplorer-search
+services:
+  searxng:
+    image: docker.io/searxng/searxng@sha256:8bdd9aa136b2dc3b9332cf24714fa34a375b8a1949a1201ec900c24d7378596e
+    ports:
+      - "127.0.0.1:8888:8080"
+    environment:
+      SEARXNG_SECRET: "${SEARXNG_SECRET:?Use Start-Search.ps1}"
+      SEARXNG_BASE_URL: http://127.0.0.1:8888/
+    volumes:
+      - ./settings.yml:/etc/searxng/settings.yml:ro
+      - search-cache:/var/cache/searxng
+    restart: "no"
+    mem_limit: 768m
+    cpus: 2
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+volumes:
+  search-cache:

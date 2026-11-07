@@ -1,0 +1,440 @@
+# InfoExplorer 开源工程调研与实施建议
+
+## 主要结论
+
+建议保留现有 React + Java + Python + MySQL 分工，优先建立“可追溯的网页研究与持续追踪”能力。最值得借鉴的是检索过程控制、稳定引用、失败保留和变化追踪，而不是照搬某个大型 Agent 框架。
+
+本次通过 GitHub 插件的仓库搜索、代码搜索、文件读取，以及互联网搜索交叉检索公开项目。对 10 个重点项目读取了 README 与至少一个相关核心实现；另对 STORM、BettaFish 做了文档层面的补充阅读。没有运行这些项目，也没有独立复现其性能或准确率声明。
+
+## 建议先借鉴的四组实现
+
+- Vane 与 Morphic：前端展示检索阶段、稳定引用编号、搜索提供商切换及可见降级。
+
+- GPT Researcher、Open Deep Research 与 dzhng/deep-research：根据已找到的材料继续提出问题，同时限制轮次、并发与总预算。
+
+- Spring AI Alibaba DeepResearch 与 DeerFlow：显式任务状态、节点边界、工具授权和执行配置记录；暂不引入通用文件或终端工具。
+
+- changedetection.io 与 TrendRadar：先检测资料修订，再判断事件变化；区分新增、当前与每日汇总。
+
+## 本项目目前处于什么位置
+
+现有运行链路仍是 Wikipedia 检索。新的通用网页模块与交互原型尚未接入现有业务 API。本轮完成受限 HTML 下载器及边界测试，并成功读取一次 Python 官方公开文档；这不是完整网页研究联调。真实 SearXNG 部署、模型适配、证据持久化与 React 接入仍待完成。
+
+阅读顺序：第 2 页看比较总表；第 3–12 页看项目源码证据；第 13–15 页看架构取舍、实施顺序与检索边界。本文“已观察”指本次读取的实现，“建议”指对 InfoExplorer 的设计判断。
+
+
+
+# 检索方法与项目总览
+
+检索覆盖通用搜索问答、深度研究、Java Agent 图编排、网页变化监测、RSS 与新闻分析。按仓库身份去重，排除同名无关项目及仅复制上游的分支；Perplexica 当前官方仓库已转为 Vane，作为一个项目处理。未用 star 数作为技术质量排序。
+
+| 项目 | 前后端形态 | 本次重点 |
+
+| --- | --- | --- |
+
+| Vane | Next.js 与 TypeScript | 有界研究循环与过程块 |
+
+| Morphic | Next.js 与 React | 检索流式状态与引用分配 |
+
+| GPT Researcher | Python 与可选 Next.js | 搜索后规划与资料共享 |
+
+| dzhng/deep-research | TypeScript CLI | 递归研究与学习结果 |
+
+| Open Deep Research | Python 与 LangGraph | 监督者与研究节点 |
+
+| DeerFlow 2 | Python 网关与 Next.js | Agent 运行边界与工具授权 |
+
+| Spring AI Alibaba | Java 与 Vue 3 | 图状态与条件路由 |
+
+| Local Deep Research | Python Web 应用 | 引擎适配与策略配置 |
+
+| changedetection.io | Python Web 应用 | 正文过滤与变化检测 |
+
+| TrendRadar | Python 与 HTML 报告 | 新增资料与每日汇总 |
+
+## 使用过的关键词组
+
+deep research agent；searxng AI search；agentic search engine；Perplexica；local-deep-research；spring ai alibaba deepresearch；news monitoring rss；event tracking llm；changedetection.io。代码检索包含 searxng search extract，以及在重点仓库中定位 research、search、make_lead_agent、incremental 等入口。
+
+互联网搜索补充发现官方仓库，随后回到 GitHub README、依赖文件和核心源码核对。全文所列链接均为原项目或官方文档；不把搜索摘要、博客介绍当成实现证明。
+
+
+
+# Vane 的有界研究循环与过程展示
+
+仓库：ItzCrazyKns/Vane，原 Perplexica。定位是带来源引用的 AI 搜索产品，整体形态比纯 Agent 示例更接近 InfoExplorer 的前端需求。
+
+## 已观察到的实现
+
+架构文档描述 Next.js 页面与 API、查询分类、研究流程、来源和回答块。researcher/index.ts 根据速度配置设置最大研究迭代数，读取到的版本分别为 2、6、25；通过 ActionRegistry 选择工具，执行工具调用并把观察结果加入后续消息。done 工具或迭代边界可以结束研究。
+
+执行期间向会话写入研究块及子步骤；结束时按 URL 聚合来源，重复 URL 的内容会合并，再输出来源块。这说明它不仅换一个搜索源，还把搜索结果作为下一轮行动的输入。
+
+前端 MessageBox.tsx 将 source blocks、research subSteps 与正文分别交给来源组件、AssistantSteps 和 Markdown 渲染。我们可借鉴这种数据驱动拆分，不必把进度信息拼进最终报告正文。
+
+## 对我们有用的部分
+
+保留“预算由程序强制执行”的做法。前端呈现当前阶段、读取的来源、失败原因及停止原因，让用户知道等待发生在哪里。来源记录与最终回答分开保存，回答中的引用应链接到稳定证据。
+
+现有 Java 负责持久化任务，适合把阶段事件保存为 runId + sequence 的记录，前端断线后可恢复。Vane 的过程块可以参考交互形式，但不能直接证明我们已有可恢复事件流。
+
+## 不宜直接照搬
+
+25 次迭代不适合作为免费模型下的默认值。应该同时限制搜索次数、读取数、模型次数和总时长。多轮研究不保证事实正确；URL 去重也不能识别不同网站转载同一篇文章。不要把模型内部推理全文当作产品执行日志。
+
+[项目 README](https://github.com/ItzCrazyKns/Vane)
+
+[架构说明](https://github.com/ItzCrazyKns/Vane/tree/master/docs/architecture)
+
+[核心研究循环](https://github.com/ItzCrazyKns/Vane/blob/master/src/lib/agents/search/researcher/index.ts)
+
+[前端消息与过程组件](https://github.com/ItzCrazyKns/Vane/blob/master/src/components/MessageBox.tsx)
+
+
+
+# Morphic 的稳定引用与搜索降级
+
+仓库：miurla/morphic。定位为带生成式界面与多种搜索选项的 AI 搜索应用。依赖文件确认使用 Next.js、React、AI SDK、Drizzle，并包含 PostgreSQL、Redis 相关依赖；无需因此把我们现有 MySQL 换掉。
+
+## 已观察到的实现
+
+lib/tools/search.ts 中的搜索工具是异步生成器，先产出 searching，再产出完成结果。它通过提供商工厂调用搜索，在允许的可恢复错误上切换备用提供商，并携带 from、to、reason 等降级信息。
+
+该实现同步预留引用编号，避免并行搜索时来源标签冲突。发送给模型的资料使用字段白名单，仅保留 URL、标题、内容、编号等，并限制内容长度；供界面及持久化使用的完整搜索结果与模型上下文分别处理。
+
+## 对我们有用的部分
+
+citation.ts 对跨消息出现歧义的来源标签选择不解析，避免错误地跳到另一轮资料。这个细节值得采用：无法唯一定位时提示引用不可用，而不是随便匹配一个相同编号。
+
+给 SearchProvider 定义统一返回结构，同时保存实际使用的引擎和降级原因。E1 等编号应由程序分配，而不是由模型任意生成；同一次执行中的编号不能随着排序或重试改变。
+
+把完整证据记录、用户可见摘要和模型上下文分开，有利于既保留可审查信息，又避免把大段网页塞进模型。本项目已有摘录预算，下一步应补齐执行内稳定编号与持久化对应关系。
+
+## 不宜直接照搬
+
+备用搜索不是无限重试，也不能悄悄把用户问题发给更多供应商。降级必须受同一预算约束并在结果中可见。生成式 UI 的可执行能力和复杂组件不是当前必需项，先把固定的任务、过程、证据视图做好更可控。
+
+[项目与技术栈](https://github.com/miurla/morphic)
+
+[依赖文件](https://github.com/miurla/morphic/blob/main/package.json)
+
+[搜索工具实现](https://github.com/miurla/morphic/blob/main/lib/tools/search.ts)
+
+[引用分配与歧义处理](https://github.com/miurla/morphic/blob/main/lib/utils/citation.ts)
+
+
+
+# GPT Researcher 的搜索后规划
+
+仓库：assafelovic/gpt-researcher。Python 研究引擎配套 Web 服务，README 提供轻量前端及 Next.js 前端方向，支持网页、本地资料及混合研究。默认示例涉及模型和搜索 API，不能把开源代码理解成运行完全免费。
+
+## 已观察到的实现
+
+gpt_researcher/skills/researcher.py 中 ResearchConductor 先获取初始搜索结果，再将结果传入研究规划。这样规划可以受现有资料约束，而不是只根据用户问题凭空生成大量搜索词。
+
+实现中保留共享 visited_urls，避免每个子主题重复访问同样的网页；对已有 source_urls 可按配置补充搜索。研究流程区分 Web、Local、Hybrid，混合模式并行准备本地与网络上下文。
+
+## 对我们有用的部分
+
+先做少量发现，再决定细化方向。例如用户研究某项政策变化，初次资料若指向发布机构和生效日期，补搜应围绕原文、修订说明和实施范围，而不是机械地换几个近义词。
+
+在单次 run 内记录候选、已读取 URL、读取失败原因和相关子问题。跨子问题复用已经获取的正文，同时保留每个来源被用于哪个问题的关系。后续跨执行缓存还需处理失效时间及网页修订，不能只用 visited 标记。
+
+## 不宜直接照搬
+
+目前不急于引入本地文档上传及混合 RAG。我们首先需要公共网页研究闭环。README 的质量或性能陈述没有在本轮复现；更多资料和更长报告都不等于引用能支持每条结论。
+
+[项目说明](https://github.com/assafelovic/gpt-researcher)
+
+[研究流程实现](https://github.com/assafelovic/gpt-researcher/blob/main/gpt_researcher/skills/researcher.py)
+
+
+
+# 小型递归研究器的可理解性
+
+仓库：dzhng/deep-research。它是紧凑的 TypeScript 研究实现，适合学习核心循环，而不是直接当成具备账户、持久化、恢复机制的完整 Web 产品。
+
+## 已观察到的实现
+
+src/deep-research.ts 使用结构化对象生成搜索词及 researchGoal，调用 Firecrawl 搜索并获取 Markdown，再从结果产生 learnings 和后续问题。并发由 pLimit 控制；递归时深度减少，广度缩小。
+
+实现把收集到的 URL 合并，最终报告附上来源列表。此处可以证明它保留访问来源，但不能据此认定报告每条陈述都经过逐段引用验证。
+
+## 对我们有用的部分
+
+可先用普通 Python 函数实现受限研究循环：原始目标保持不变；每轮记录已知事实、未覆盖问题、可行动查询；根据缺口补搜；预算耗尽则返回部分成果。这样的流程足够清晰，便于解释、测试和排查。
+
+我们已实现可注入工具的一轮补搜执行器，但真实覆盖判断与报告适配尚未完成。这个项目提供了小而完整的算法参照，有助于避免一开始就加入复杂的多 Agent 协调。
+
+## 不宜直接照搬
+
+递归深度并不是总成本上限。每层可能有多次搜索和模型调用，必须另设全局预算。Firecrawl 作为示例依赖不能自动替代为“免费基础设施”；本项目选择 SearXNG 与受控下载提取，需要维持相同的输入输出契约。
+
+[项目说明](https://github.com/dzhng/deep-research)
+
+[递归研究核心](https://github.com/dzhng/deep-research/blob/main/src/deep-research.ts)
+
+
+
+# Open Deep Research 的图编排
+
+仓库：langchain-ai/open_deep_research。以 Python 与 LangGraph 实现深度研究，开发界面主要面向调试研究流程，不等于已经具备 InfoExplorer 所需的业务前端和 Java 数据管理。
+
+## 已观察到的实现
+
+deep_researcher.py 将流程拆成需求澄清、research brief、监督者、研究者、压缩研究结果与最终报告等节点。监督者可调用 ConductResearch、ResearchComplete 等工具；研究任务可并发执行。
+
+代码限制 supervisor 迭代和并发研究单元数量。研究压缩与 raw notes 分开存在，说明“给下一步看的摘要”和“原始观察记录”可以有不同生命周期。
+
+## 对我们有用的部分
+
+在开始时形成固定研究目标及完成标准，后续搜索词变化不能悄悄改变任务。保存原始证据快照和摘要之间的关联，压缩失败不应丢掉已经获取的资料。
+
+需要并行时按独立子问题拆分，并统一分配来源编号和剩余预算。当前先采用单研究流程加一轮补搜，待串行流程稳定后再讨论并行，复杂度更容易控制。
+
+## 不宜直接照搬
+
+Agnes 当前模型能否稳定支持该项目要求的工具调用与结构化输出，尚未验证。框架能保存图状态，不代表跨服务事务、任务幂等和数据库恢复已经解决。不能以引入 LangGraph 代替这些业务设计。
+
+[项目说明](https://github.com/langchain-ai/open_deep_research)
+
+[节点与图实现](https://github.com/langchain-ai/open_deep_research/blob/main/src/open_deep_research/deep_researcher.py)
+
+
+
+# DeerFlow 的运行边界与工具授权
+
+仓库：bytedance/deer-flow。当前 README 明确区分 2.0 与旧研究版本；2.0 已扩展为通用 Agent 运行框架。比较时不能把旧版的研究流程介绍直接套在当前主分支上。
+
+## 已观察到的实现
+
+后端说明描述网关、运行时和主 Agent 的分层；前端依赖文件确认 Next.js、React、TanStack Query 等。lead_agent/agent.py 组装工具、授权过滤、中间件、系统提示和状态结构，再创建 Agent。
+
+核心装配包含工具授权结果与最终工具视图校验，记录有效模型及策略配置。代码还依据来源渠道限制某些可修改 Agent 自身的工具，体现了“功能存在”和“当前请求可使用”之间的区别。
+
+## 对我们有用的部分
+
+把请求 ID、执行配置、工具预算、允许的操作与实际结果集中记录。一个任务开始后使用配置快照，避免用户中途修改设置导致历史执行无法解释。
+
+公开网页始终是不可信数据；网页中的“运行命令”“修改配置”等内容不得转化为工具权限。我们只给模型问题与证据，继续保持没有文件、数据库和终端工具的边界。
+
+## 不宜直接照搬
+
+不把通用沙箱、长期记忆、文件操作和多种 MCP 工具全搬入信息研究项目。这会显著扩大维护和安全范围。本轮读取了主 Agent 装配及架构资料，未完成其整个权限系统或沙箱的安全审计。
+
+[项目与版本说明](https://github.com/bytedance/deer-flow)
+
+[后端架构](https://github.com/bytedance/deer-flow/blob/main/backend/README.md)
+
+[主 Agent 装配](https://github.com/bytedance/deer-flow/blob/main/backend/packages/harness/deerflow/agents/lead_agent/agent.py)
+
+
+
+# Spring AI Alibaba 的 Java 图状态
+
+仓库：spring-ai-alibaba/deepresearch。与 Java 后端求职方向相关：README 描述 Spring Boot、Spring AI 与 Graph，前端依赖文件确认 Vue 3、Vite、Pinia 和 Ant Design Vue。
+
+## 已观察到的实现
+
+DeepResearchConfiguration.java 显式定义状态键与更新策略，包含 query、thread_id、plan_iterations、current_plan 等。流程由命名节点及条件边组成，协调、改写、背景搜索、规划等阶段有明确入口。
+
+README 还介绍反思、人工介入、检索增强及工具扩展。这些是项目能力说明；本轮重点核对的是图配置和前端依赖，没有逐项运行验证所有可选能力。
+
+## 对我们有用的部分
+
+Java 层应当有清晰的任务状态机和持久化边界，Python 返回的阶段、警告、证据与失败成果应遵守明确契约。可以先用普通服务与枚举实现，不必立即把业务状态交给另一个框架。
+
+在面试中更有价值的解释是：为何同一幂等键只创建一次执行、如何避免重启后重复调用模型、为什么保存失败与模型失败要分开处理，以及如何兼容旧数据库记录。
+
+## 不宜直接照搬
+
+该项目使用的 Spring 依赖代际与我们现有 Spring Boot 4.1 不同，不能直接复制依赖表。也没有必要为了“Java 含量”把已工作的 Python 检索层重写成 Java。Tavily、Jina、云厂商搜索等可选组件的计费需要分别核对。
+
+[项目说明](https://github.com/spring-ai-alibaba/deepresearch)
+
+[图与状态配置](https://github.com/spring-ai-alibaba/deepresearch/blob/main/src/main/java/com/alibaba/cloud/ai/example/deepresearch/config/DeepResearchConfiguration.java)
+
+[前端依赖](https://github.com/spring-ai-alibaba/deepresearch/blob/main/ui-vue3/package.json)
+
+
+
+# Local Deep Research 的策略与引擎边界
+
+仓库：LearningCircuit/local-deep-research。面向可配置的本地研究，支持不同搜索和模型后端。当前依赖文件含 FastAPI、SQLAlchemy、Trafilatura、Playwright 等；不能根据旧文章假定当前仍是原来的 Web 框架。
+
+## 已观察到的实现
+
+search_system.py 通过 AdvancedSearchSystem 选择研究策略，并接收 settings_snapshot 等配置。SearXNG 适配器处理实例地址、搜索结果与限流，还区分由操作者配置的搜索实例和搜索返回的外部地址。
+
+这一区别对自托管系统很关键：本机 SearXNG 可以是被明确授权的回环服务，但搜索结果里的任意 URL 不能借此获得访问内网的权限。
+
+## 对我们有用的部分
+
+保持搜索工具、网页下载和正文提取三个独立边界。每个提供商报告自身能力，例如语言、时间筛选、是否提供正文；不能假定所有引擎都支持同样参数。
+
+把研究策略与供应商解耦。将来换搜索引擎不应重写任务状态和证据存储；换模型也不应改变网页下载权限。每次执行固定策略版本及配置摘要，便于重现。
+
+## 不宜直接照搬
+
+项目的依赖范围很大，包含文档处理、浏览器和多种搜索服务。当前不需要把全部依赖安装进我们的 Python 环境。README 的基准成绩是作者声明，本轮没有复测，也不能直接推导我们使用 Agnes 后的效果。
+
+[项目说明](https://github.com/LearningCircuit/local-deep-research)
+
+[研究策略入口](https://github.com/LearningCircuit/local-deep-research/blob/main/src/local_deep_research/search_system.py)
+
+[SearXNG 适配器](https://github.com/LearningCircuit/local-deep-research/blob/main/src/local_deep_research/web_search_engines/engines/search_engine_searxng.py)
+
+
+
+# changedetection 的资料修订检测
+
+仓库：dgtlmoon/changedetection.io。主要解决网页内容变化监测，和开放式问答不同，却很适合参考 InfoExplorer 的“持续事件追踪”部分。
+
+## 已观察到的实现
+
+text_json_diff/processor.py 将过滤配置、正文变换和触发规则分开。FilterConfig 汇合监测项、标签与全局设置；过滤配置的哈希参与判断，避免配置改变后仍把网页错误地当成未变化。
+
+ContentTransformer 负责去除空白、去重、排序等变换，RuleEngine 再判断触发条件。README 介绍选择器、频率、可选浏览器获取与通知等能力，本轮没有部署其浏览器或通知服务。
+
+## 对我们有用的部分
+
+同一 URL 保存 source revision，记录抓取时间、正文哈希和提取规则版本。正文没变则不重复消耗模型；规则变了则重新提取并明确说明原因。采用哈希做相等性比较，不把哈希视为来源真实的证明。
+
+应先检测资料变化，再由证据判断是否产生新事件或修订原事件。网页改广告、导航或推荐内容，不应该让事件时间线增加一条“新进展”。
+
+## 不宜直接照搬
+
+网页 diff 不是事件理解。同一事件可以在多个网址被报道，一篇网页也可以同时包含多个事件。我们仍需区分 topic、cycle、event、revision，并保留来源之间的冲突，而不是用“页面变了”直接等价于“事情发生了”。
+
+[项目说明](https://github.com/dgtlmoon/changedetection.io)
+
+[正文变化处理器](https://github.com/dgtlmoon/changedetection.io/blob/master/changedetectionio/processors/text_json_diff/processor.py)
+
+
+
+# TrendRadar 的增量与日报语义
+
+仓库：sansan0/TrendRadar。以热点、RSS、筛选、分析及通知为主要场景，生成 HTML 报告；适合作为持续监测产品形态的参考，不是完整的证据型问答引擎。
+
+## 已观察到的实现
+
+report/generator.py 区分 daily、incremental、current 报告模式，对新增标题与最终保留的结果进行关联过滤，避免被筛掉的内容仍出现在新增区。首次全部为新增时也有重复展示处理。
+
+报告数据包含排名时间线和失败源等信息；生成逻辑保留带时间的历史 HTML，并更新相应最新报告入口。它把“当前看到了什么”和“本轮新出现了什么”分开表达。
+
+补充读取 AI 筛选流水线：按已分析 ID 跳过重复分类，并用兴趣配置 hash 判断是否调整标签或重分类。可借鉴“配置变化也影响分析有效性”，但新闻分类缓存仍不能代替正文修订检测。
+
+## 对我们有用的部分
+
+追踪轮次必须保存基线。第一次建立主题只能说“首次发现”，不能冒充“刚刚发生”。之后的轮次明确显示新增、更新、未变化、无法读取，以及本轮哪些来源失败。
+
+用户应能回看某一轮的资料与当时结论，而不是每次运行覆盖同一份报告。可以先做手动触发一轮，验证增量语义后再加入定时调度和通知。
+
+## 不宜直接照搬
+
+标题、热榜排名和关键词命中不是事实证据强度。RSS 和热榜适合发现候选，关键结论仍应回到正文或原始发布机构。外部通知先暂缓，不需要为展示完整性立即接入多个消息平台。
+
+[项目说明](https://github.com/sansan0/TrendRadar)
+
+[报告模式与新增处理](https://github.com/sansan0/TrendRadar/blob/master/trendradar/report/generator.py)
+
+[分类缓存与配置变化](https://github.com/sansan0/TrendRadar/blob/master/trendradar/ai/filter_pipeline.py)
+
+
+
+# 我们应采用的研究与追踪架构
+
+检索范围扩大只是第一步。较完整的研究过程是：固定用户目标 → 初次发现 → 筛选来源 → 受控读取 → 提取证据 → 判断缺口 → 有限补搜 → 生成带引用的结论或部分成果。每一步都要留下可解释的记录。
+
+| 层次 | 保留的技术 | 下一项实际职责 |
+
+| --- | --- | --- |
+
+| 前端 | React 与 TypeScript | 显示阶段、来源、失败及停止原因 |
+
+| 业务后端 | Java 与 MySQL | run 状态、幂等、事件记录、事务和恢复 |
+
+| 研究执行 | Python | 共享预算、工具调度、证据筛选、覆盖判断 |
+
+| 候选发现 | 自托管 SearXNG | 聚合搜索结果，不宣称自建全网索引 |
+
+| 网页读取 | 受限 HTTP 与 Trafilatura | 公共地址校验、正文提取、读取状态 |
+
+| 可选增强 | Crawl4AI | 仅在静态读取不足时单独设计和验证 |
+
+## 前端与后端怎样协作
+
+后端先返回任务标识；前端通过阶段事件了解进度，刷新后可从数据库重建。报告、证据、执行历史分别查询。引用点击定位到保存的摘录与来源，而不是只打开一个可能已经变化的网页。
+
+## Agent 的决策边界
+
+模型可建议子问题、补搜词和结论；程序决定是否还有预算、工具能访问什么、结果结构是否有效。覆盖判断不足时应给出缺口，不靠一段“自我反思”文字证明已经严谨。
+
+## 事件追踪与研究回答的衔接
+
+研究产出可加入追踪主题。下一轮先比较资料修订，再合并或新增事件；同时保存事件发生时间、页面发布时间和抓取时间，不混成一个时间字段。冲突证据并列保留，人工可核对。
+
+
+
+# 实施顺序与简历中的可验证价值
+
+| 顺序 | 工作范围 | 完成标准 |
+
+| --- | --- | --- |
+
+| 1 | 受控下载与提取组合 | 公开 HTML 可读取；失败可分类；证据定位可回溯 |
+
+| 2 | 真实 SearXNG 接入 | 本机部署可用；公开查询返回候选；上游失败可见 |
+
+| 3 | 研究执行器与模型适配 | 保持原始目标；预算强制；补搜最多一轮；部分成果保留 |
+
+| 4 | Java 契约与持久化 | 旧数据兼容；失败不重复调模型；任务重开可查 |
+
+| 5 | React 过程与来源 | 真实 API 接入；刷新恢复；引用定位；无结果原因清楚 |
+
+| 6 | 手动追踪与增量 | 首次基线、新增、修订和失败分开；再引入调度 |
+
+## 本轮已经完成与尚未完成
+
+已新增受限下载器：公共 DNS 地址检查、连接到已核验数字 IP、TLS 主机名校验、逐跳检查、传输大小限制、保守 robots 规则与进程级截止。真实读取 Python 官方文档成功，未调用模型或数据库。它尚未连接 ContentTool 与运行 API。
+
+限制包括：不执行 JavaScript，不接受压缩正文，robots 不支持的规则会拒绝；没有跨进程域名限流和操作系统级内存隔离。真实 SearXNG、完整网页研究、Java/MySQL 迁移及 React 接入没有在本轮验证。
+
+## 怎样形成有说服力的项目经历
+
+可展示的难点应落实为证据：重启后报告仍可查询；重复提交只执行一次；模型失败仍保留来源；危险地址被拒绝；断线后进度可恢复；重复追踪不会制造重复事件。完成后再将这些写入简历，不能先写成已实现。
+
+无需为了“企业技术多”立即加入 Kafka、Kubernetes、向量数据库或复杂多 Agent。只有当任务排队、部署规模或语义检索出现明确需求时，再引入相应组件，并解释它解决了什么实际问题。
+
+
+
+# 补充方向与调研边界
+
+## 值得后续继续阅读的项目
+
+STORM：stanford-oval/storm。README 介绍多视角问题生成与资料组织，适合学习研究提纲和观点覆盖。本轮只做文档阅读；其 Wikipedia 风格文章不表示资料仅来自 Wikipedia。
+
+[STORM](https://github.com/stanford-oval/storm)
+
+BettaFish：666ghj/BettaFish。README 介绍多类分析引擎和论坛式协调，适合研究舆情分析产品如何拆分信息类型。本轮未核对各引擎核心实现，不采信其规模或效果陈述为已验证事实。
+
+[BettaFish](https://github.com/666ghj/BettaFish)
+
+检索还发现 MindSearch 等候选，但本轮未做同等深度的源码审阅。可能遗漏学术论文附属代码、非英文项目、刚创建或未被索引的仓库、特定行业监测和浏览器检索工具；搜索不到不代表不存在。
+
+## 基础组件的角色
+
+SearXNG 用于发现网页；Trafilatura 用于提取静态 HTML；Crawl4AI 可用于需要浏览器的页面。开源不保证搜索上游稳定、所有网页可抓取或运行零成本。选择部署方式后仍需验证资源、可达性、抓取规则和许可证。
+
+[SearXNG 官方文档](https://docs.searxng.org/)
+
+[Trafilatura 官方文档](https://trafilatura.readthedocs.io/)
+
+[Crawl4AI 官方仓库](https://github.com/unclecode/crawl4ai)
+
+## 证据与使用限制
+
+本报告基于 2026 年 10 月 15 日访问的公开主分支及文档，链接内容后续可能变化。工程内另存已读取文件的路径和文件 SHA；文件 SHA 是内容标识，不是仓库提交 SHA。本轮未全面核验许可证及所有依赖，复制代码或发布前应逐项检查。
+
+这是一份有范围的源码调研与设计建议，不是穷尽 GitHub 的清单、项目安全审计或性能排名。没有依据公开项目反推 ChatGPT 私有搜索实现，也没有把任何项目的宣传成绩当作我们项目的效果保证。
+

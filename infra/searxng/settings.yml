@@ -1,0 +1,37 @@
+use_default_settings:
+  engines:
+    keep_only:
+      - bing
+      - duckduckgo
+      - brave
+      - yahoo
+general:
+  instance_name: InfoExplorer Local Search
+  debug: false
+search:
+  safe_search: 1
+  autocomplete: ""
+  formats:
+    - html
+    - json
+server:
+  limiter: false
+  public_instance: false
+  image_proxy: false
+  method: POST
+outgoing:
+  request_timeout: 6.0
+  max_request_timeout: 10.0
+engines:
+  - name: bing
+    # Direct upstream probes returned unrelated results even for site: queries.
+    disabled: true
+  - name: duckduckgo
+    # Current egress receives CAPTCHA; do not repeatedly query while blocked.
+    disabled: true
+  - name: brave
+    # Current local egress is rate-limited; re-enable only after live validation.
+    disabled: true
+  - name: yahoo
+    # 2026-10-22: public EN/ZH and site-scoped probes returned relevant results.
+    disabled: false

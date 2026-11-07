@@ -1,0 +1,612 @@
+{
+  "$defs": {
+    "CandidateWire": {
+      "additionalProperties": false,
+      "properties": {
+        "sourceId": {
+          "pattern": "^S[0-9a-f]{64}$",
+          "title": "Sourceid",
+          "type": "string"
+        },
+        "requestedUrl": {
+          "title": "Requestedurl",
+          "type": "string"
+        },
+        "canonicalUrl": {
+          "title": "Canonicalurl",
+          "type": "string"
+        },
+        "host": {
+          "title": "Host",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "snippet": {
+          "title": "Snippet",
+          "type": "string"
+        },
+        "rank": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "engines": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Engines",
+          "type": "array"
+        },
+        "publishedText": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Publishedtext"
+        }
+      },
+      "required": [
+        "sourceId",
+        "requestedUrl",
+        "canonicalUrl",
+        "host",
+        "title",
+        "snippet",
+        "rank",
+        "engines",
+        "publishedText"
+      ],
+      "title": "CandidateWire",
+      "type": "object"
+    },
+    "CoverageWire": {
+      "additionalProperties": false,
+      "properties": {
+        "questionId": {
+          "title": "Questionid",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "covered",
+            "partial",
+            "missing"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "evidenceIds": {
+          "items": {
+            "pattern": "^E([1-9]|1[0-6])$",
+            "type": "string"
+          },
+          "title": "Evidenceids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "questionId",
+        "state",
+        "evidenceIds"
+      ],
+      "title": "CoverageWire",
+      "type": "object"
+    },
+    "Metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "requestedUrl": {
+          "title": "Requestedurl",
+          "type": "string"
+        },
+        "resolvedUrl": {
+          "title": "Resolvedurl",
+          "type": "string"
+        },
+        "resolvedHost": {
+          "title": "Resolvedhost",
+          "type": "string"
+        },
+        "retrievedAt": {
+          "title": "Retrievedat",
+          "type": "string"
+        },
+        "contentType": {
+          "title": "Contenttype",
+          "type": "string"
+        },
+        "httpRequests": {
+          "maximum": 12,
+          "minimum": 1,
+          "title": "Httprequests",
+          "type": "integer"
+        },
+        "extractor": {
+          "title": "Extractor",
+          "type": "string"
+        },
+        "publishedText": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Publishedtext"
+        },
+        "publishedBasis": {
+          "enum": [
+            "extractor_unverified",
+            "unknown"
+          ],
+          "title": "Publishedbasis",
+          "type": "string"
+        },
+        "truncated": {
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "extractedTextHash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Extractedtexthash",
+          "type": "string"
+        },
+        "normalizationVersion": {
+          "const": "paragraph-json-v1",
+          "title": "Normalizationversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requestedUrl",
+        "resolvedUrl",
+        "resolvedHost",
+        "retrievedAt",
+        "contentType",
+        "httpRequests",
+        "extractor",
+        "publishedText",
+        "publishedBasis",
+        "truncated",
+        "extractedTextHash",
+        "normalizationVersion"
+      ],
+      "title": "Metadata",
+      "type": "object"
+    },
+    "OutcomeWire": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "SUCCEEDED",
+            "FAILED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "completionReason": {
+          "pattern": "^[A-Z][A-Z0-9_]{0,79}$",
+          "title": "Completionreason",
+          "type": "string"
+        },
+        "coverage": {
+          "enum": [
+            "unknown",
+            "partial",
+            "sufficient"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "answer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Answer"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/PassageWire"
+          },
+          "maxItems": 8,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "queries": {
+          "items": {
+            "$ref": "#/$defs/QueryWire"
+          },
+          "maxItems": 5,
+          "title": "Queries",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceWire"
+          },
+          "maxItems": 25,
+          "title": "Sources",
+          "type": "array"
+        },
+        "usage": {
+          "$ref": "#/$defs/UsageWire"
+        },
+        "reviewApplied": {
+          "title": "Reviewapplied",
+          "type": "boolean"
+        },
+        "runId": {
+          "title": "Runid",
+          "type": "string"
+        },
+        "reviewSnapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SnapshotWire"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "completionReason",
+        "coverage",
+        "answer",
+        "evidence",
+        "queries",
+        "sources",
+        "usage",
+        "reviewApplied",
+        "runId",
+        "reviewSnapshot"
+      ],
+      "title": "OutcomeWire",
+      "type": "object"
+    },
+    "PassageWire": {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceId": {
+          "pattern": "^E([1-9]|1[0-6])$",
+          "title": "Evidenceid",
+          "type": "string"
+        },
+        "sourceId": {
+          "pattern": "^S[0-9a-f]{64}$",
+          "title": "Sourceid",
+          "type": "string"
+        },
+        "paragraphIndex": {
+          "exclusiveMaximum": 1000,
+          "minimum": 0,
+          "title": "Paragraphindex",
+          "type": "integer"
+        },
+        "offsetUtf16": {
+          "maximum": 30000,
+          "minimum": 0,
+          "title": "Offsetutf16",
+          "type": "integer"
+        },
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "contentHash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Contenthash",
+          "type": "string"
+        },
+        "matchedQuestionIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Matchedquestionids",
+          "type": "array"
+        },
+        "relevance": {
+          "maximum": 1.1,
+          "minimum": 0,
+          "title": "Relevance",
+          "type": "number"
+        },
+        "truncated": {
+          "title": "Truncated",
+          "type": "boolean"
+        },
+        "evidenceKey": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Evidencekey",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidenceId",
+        "sourceId",
+        "paragraphIndex",
+        "offsetUtf16",
+        "excerpt",
+        "contentHash",
+        "matchedQuestionIds",
+        "relevance",
+        "truncated",
+        "evidenceKey"
+      ],
+      "title": "PassageWire",
+      "type": "object"
+    },
+    "QueryWire": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "round": {
+          "enum": [
+            0,
+            1
+          ],
+          "title": "Round",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "SUCCEEDED",
+            "FAILED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "sourceIds": {
+          "items": {
+            "pattern": "^S[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Sourceids",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "const": "SEARCH_ENGINES_PARTIALLY_UNAVAILABLE",
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z][A-Z0-9_]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Errorcode"
+        }
+      },
+      "required": [
+        "query",
+        "round",
+        "status",
+        "sourceIds",
+        "warnings",
+        "errorCode"
+      ],
+      "title": "QueryWire",
+      "type": "object"
+    },
+    "ReviewWire": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage": {
+          "items": {
+            "$ref": "#/$defs/CoverageWire"
+          },
+          "maxItems": 8,
+          "title": "Coverage",
+          "type": "array"
+        },
+        "extraQueries": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "title": "Extraqueries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "coverage",
+        "extraQueries"
+      ],
+      "title": "ReviewWire",
+      "type": "object"
+    },
+    "SnapshotWire": {
+      "additionalProperties": false,
+      "properties": {
+        "round": {
+          "const": 0,
+          "title": "Round",
+          "type": "integer"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/PassageWire"
+          },
+          "maxItems": 8,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "decision": {
+          "$ref": "#/$defs/ReviewWire"
+        }
+      },
+      "required": [
+        "round",
+        "evidence",
+        "decision"
+      ],
+      "title": "SnapshotWire",
+      "type": "object"
+    },
+    "SourceWire": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate": {
+          "$ref": "#/$defs/CandidateWire"
+        },
+        "status": {
+          "enum": [
+            "READ",
+            "FAILED",
+            "SKIPPED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z][A-Z0-9_]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Errorcode"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Metadata"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "candidate",
+        "status",
+        "errorCode",
+        "metadata"
+      ],
+      "title": "SourceWire",
+      "type": "object"
+    },
+    "UsageWire": {
+      "additionalProperties": false,
+      "properties": {
+        "searches": {
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Searches",
+          "type": "integer"
+        },
+        "documents": {
+          "maximum": 8,
+          "minimum": 0,
+          "title": "Documents",
+          "type": "integer"
+        },
+        "modelCalls": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Modelcalls",
+          "type": "integer"
+        },
+        "remainingSeconds": {
+          "maximum": 150,
+          "minimum": 0,
+          "title": "Remainingseconds",
+          "type": "number"
+        },
+        "cancelled": {
+          "title": "Cancelled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "searches",
+        "documents",
+        "modelCalls",
+        "remainingSeconds",
+        "cancelled"
+      ],
+      "title": "UsageWire",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "web-research-v2",
+      "default": "web-research-v2",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "mode": {
+      "const": "web-extract",
+      "default": "web-extract",
+      "title": "Mode",
+      "type": "string"
+    },
+    "language": {
+      "enum": [
+        "en",
+        "zh"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "planMode": {
+      "const": "direct",
+      "default": "direct",
+      "title": "Planmode",
+      "type": "string"
+    },
+    "questions": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Questions",
+      "type": "object"
+    },
+    "outcome": {
+      "$ref": "#/$defs/OutcomeWire"
+    }
+  },
+  "required": [
+    "language",
+    "questions",
+    "outcome"
+  ],
+  "title": "WebResponse",
+  "type": "object"
+}

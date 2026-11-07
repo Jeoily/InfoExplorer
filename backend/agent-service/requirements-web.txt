@@ -1,0 +1,3 @@
+# Optional web extraction dependency; not imported by current FastAPI routes.
+# Direct version pinned; transitive lock/compatibility remains a packaging task.
+trafilatura==2.3.1

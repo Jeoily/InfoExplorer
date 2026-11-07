@@ -1,0 +1,29 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "runId": {
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      "title": "Runid",
+      "type": "string"
+    },
+    "question": {
+      "title": "Question",
+      "type": "string"
+    },
+    "language": {
+      "default": "en",
+      "enum": [
+        "en",
+        "zh"
+      ],
+      "title": "Language",
+      "type": "string"
+    }
+  },
+  "required": [
+    "runId",
+    "question"
+  ],
+  "title": "WebRequest",
+  "type": "object"
+}
